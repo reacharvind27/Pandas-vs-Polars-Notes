@@ -116,8 +116,8 @@ Key difference:
 
 ⚡ Polars: No automatic index — you must create one explicitly when you need row-level referencing.
 
-## 03. Lazy Execution Can Be Confusing
-Polars can build a query plan before executing it (based on user action).
+## 03. Lazy Execution
+Polars can build a query plan before executing it.
 
 Pandas executes operations immediately.
 
@@ -161,7 +161,7 @@ print(result)          # Real data appears here
 )
 ```
 
-## 04. Memory Behavior (RAM Usage)
+## 04. Memory Behavior
 Pandas and Polars both load data from files, but they manage memory very differently.
 
 What Pandas Does
