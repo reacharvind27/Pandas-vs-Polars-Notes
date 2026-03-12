@@ -1,4 +1,4 @@
-# Pandas-vs-Polars-Notes
+# Pandas vs Polars-Notes
 
 Pandas vs. Polars: Choosing Your Data Superpower!
 
