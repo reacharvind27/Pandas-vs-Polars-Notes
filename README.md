@@ -1,16 +1,14 @@
-# Pandas vs Polars
-
-Pandas vs. Polars: Choosing Your Data Superpower!
+# Pandas vs. Polars: Choosing Your Data Superpower!
 
 For more than a decade, Pandas has been the standard tool for data analysis in Python. Nearly every data professional learns it first.
 
 But a newer library called Polars is quickly gaining attention because it is faster, more memory‑efficient, and designed for modern multi‑core systems.
 
-Think of it like this: 
+# Think of it like this: 
 - Pandas is a reliable old bicycle—it gets you where you need to go.
 - Polars is a high-speed electric scooter—it’s built for the modern world and moves much faster!
 
-Core Differences
+# Core Differences
 | Feature             | Pandas                     | Polars                            |
 | ------------------- | -------------------------- | --------------------------------- |
 | Language            | Python with C extensions   | Rust                              |
@@ -25,7 +23,7 @@ Core Differences
 | Type Handling       | Flexible                   | Strict schema enforcement         |
 | Year Introduced     | 2008                       | 2020                              |
 
-Common Operations (Pandas vs Polars)
+# Common Operations (Pandas vs Polars)
 
 | Task           | Pandas                           | Polars                                        |
 | -------------- | -------------------------------- | --------------------------------------------- |
@@ -50,9 +48,9 @@ Common Operations (Pandas vs Polars)
 | Summary stats  | df.describe()                    | df.describe()                                 |
 | Save CSV       | df.to_csv("out.csv")             | df.write_csv("out.csv")                       |
 
-Risks & Things to Watch Out For
+# Risks & Things to Watch Out For
 
-1. Strict Data Types (Schema Enforcement)
+## 01. Strict Data Types (Schema Enforcement)
 Pandas is flexible with data types, which can sometimes hide errors.
 
 Polars enforces strict column types, catching issues earlier.
@@ -79,7 +77,7 @@ except Exception as e:
 ```
 
 
-2. No Row Index
+## 02. No Row Index
 Pandas uses an index to label rows.
 
 Polars removes the index concept entirely.
@@ -102,7 +100,7 @@ print(df.loc[0])
 ```
 Key idea: Code that relies on .loc or .iloc must be rewritten.
 
-3. Lazy Execution Can Be Confusing
+## 03. Lazy Execution Can Be Confusing
 Polars can build a query plan before executing it.
 
 Pandas executes operations immediately.
@@ -127,7 +125,7 @@ result = (
 ```
 If .collect() is missing, nothing runs.
 
-4. Memory Behavior (RAM Usage)
+## 04. Memory Behavior (RAM Usage)
 Pandas tries to load the entire dataset into memory.
 
 Polars can process data in chunks using streaming.
@@ -148,7 +146,7 @@ result = df.collect()
 ```
 This allows Polars to handle datasets larger than RAM.
 
-6. Copy vs Immutable Data Behavior
+## 05. Copy vs Immutable Data Behavior
 Pandas sometimes creates hidden copies of data, which leads to the famous warning:
 
 SettingWithCopyWarning
@@ -167,7 +165,7 @@ df_filtered["age"] = df_filtered["age"] + 1
 ```
 Key idea: Polars transformations create predictable outputs.
 
-Final Thought
+# Final Thought
 Pandas is still the most widely used tool for data analysis, but Polars is rapidly becoming the performance‑focused alternative for modern data workloads.
 
 Many teams are now adopting a hybrid approach:
@@ -177,6 +175,3 @@ Pandas for exploration and compatibility
 Polars for performance and large‑scale processing
 
 If you work with large datasets, multi‑core machines, or data pipelines, Polars is definitely worth exploring.
-
-
-
