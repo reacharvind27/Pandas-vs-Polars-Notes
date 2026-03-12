@@ -68,12 +68,10 @@ print(df["age"].mean())   # crashes later
 Polars example:
 ```python
 import polars as pl
-
 try:
     df = pl.DataFrame({"age":[10,11,"Twelve"]})
 except Exception as e:
     print("Polars error:", e)
-
 ```
 
 
@@ -92,11 +90,11 @@ print(df.loc[0])
 
 Polars example:
 ```python
-import pandas as pd
+import polars as pl
 
-df = pd.DataFrame({"name":["Alice","Bob","Tom"]})
-print(df.loc[0])
+df = pl.DataFrame({"name":["Alice","Bob","Tom"]})
 
+print(df.slice(0,1))
 ```
 Key idea: Code that relies on .loc or .iloc must be rewritten.
 
@@ -116,7 +114,6 @@ result = df[df["name"]=="Alice"]
 Polars example:
 ```python
 import polars as pl
-
 result = (
     pl.scan_csv("giant_data.csv")
     .filter(pl.col("name")=="Alice")
@@ -147,21 +144,19 @@ result = df.collect()
 This allows Polars to handle datasets larger than RAM.
 
 ## 05. Copy vs Immutable Data Behavior
-Pandas sometimes creates hidden copies of data, which leads to the famous warning:
-
-SettingWithCopyWarning
+Pandas sometimes creates hidden copies of data, which leads to the famous warning: SettingWithCopyWarning
 
 Pandas example:
 ```python
-df_filtered = df[df["age"]>10]
+df_filtered = df[df["age"] > 10]
 df_filtered["age"] = df_filtered["age"] + 1
-
 ```
 
 Polars example:
 ```python
-df_filtered = df[df["age"]>10]
-df_filtered["age"] = df_filtered["age"] + 1
+df = df.with_columns(
+    (pl.col("age") + 1).alias("age")
+)
 ```
 Key idea: Polars transformations create predictable outputs.
 
