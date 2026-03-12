@@ -74,7 +74,6 @@ except Exception as e:
     print("Polars error:", e)
 ```
 
-
 ## 02. No Row Index
 Pandas uses an index to label rows.
 
@@ -84,64 +83,126 @@ Pandas example:
 ```python
 import pandas as pd
 
-df = pd.DataFrame({"name":["Alice","Bob","Tom"]})
-print(df.loc[0])
+df_pd = pd.DataFrame({
+    "fruit": ["apple", "banana", "cherry"],
+    "votes": [10, 5, 8]
+})
+
+# Pandas automatically adds a hidden index (0,1,2)
+print(df_pd.loc[1])  # Fetch row with index 1
 ```
 
 Polars example:
 ```python
 import polars as pl
 
-df = pl.DataFrame({"name":["Alice","Bob","Tom"]})
+# 1. Create a DataFrame
+df = pl.DataFrame({
+    "fruit": ["apple", "banana", "cherry"],
+    "votes": [10, 5, 8]
+})
 
-print(df.slice(0,1))
+# 2. Add a row index (default name is "index")
+df_with_index = df.with_row_index(name="row_id")
+print(df_with_index)
+
+# 3. Filter using the index (retrieve row_id == 1)
+filtered_df = df_with_index.filter(pl.col("row_id") == 1)
+print(filtered_df)
 ```
-Key idea: Code that relies on .loc or .iloc must be rewritten.
+Key difference:
+
+🐼 Pandas: Index is created automatically and used for row lookups (.loc, .iloc).
+
+⚡ Polars: No automatic index — you must create one explicitly when you need row-level referencing.
 
 ## 03. Lazy Execution Can Be Confusing
-Polars can build a query plan before executing it.
+Polars can build a query plan before executing it (based on user action).
 
 Pandas executes operations immediately.
 
 Pandas example:
+- In Pandas, every line runs immediately:
+- Each step loads data or creates a new DataFrame in memory
+- 
+
 ```python
 import pandas as pd
 
-df = pd.read_csv("giant_data.csv")
-result = df[df["name"]=="Alice"]
+df = pd.read_csv("giant_data.csv")          # File is read now
+df = df[df["name"] == "Alice"]              # Filter runs now
+result = df.groupby("city")["score"].mean() # Groupby runs now
+
 ```
 
 Polars example:
+- scan_csv creates a lazy frame (a blueprint), not an in‑memory DataFrame.
+- Every .filter(), .group_by(), .agg() call is recorded as steps in a query plan.
+- Only when you call .collect() does Polars:
+  - Read the file
+  - Apply optimizations (push filters early, drop unused columns)
+  - Execute the pipeline and return a concrete DataFrame.
+
 ```python
 import polars as pl
-result = (
-    pl.scan_csv("giant_data.csv")
-    .filter(pl.col("name")=="Alice")
-    .collect()
+
+q = (
+    pl.scan_csv("giant_data.csv")                 # 1. Define data source
+    .filter(pl.col("name") == "Alice")            # 2. Add filter
+    .group_by("city")                             # 3. Add groupby
+    .agg(pl.col("score").mean())                  # 4. Add aggregation
+)
+
+# Until here, NOTHING has actually run.
+print(q)      # Shows a plan, not the real data
+
+result = q.collect()   # Now Polars executes the whole plan at once
+print(result)          # Real data appears here
 )
 ```
-If .collect() is missing, nothing runs.
 
 ## 04. Memory Behavior (RAM Usage)
-Pandas tries to load the entire dataset into memory.
+Pandas and Polars both load data from files, but they manage memory very differently.
 
-Polars can process data in chunks using streaming.
+What Pandas Does
+- pd.read_csv("large_file.csv") reads the entire file into memory at once.
+- For big CSVs, this can cause:
+  - Large, sudden spikes in RAM use
+  - Crashes or the OS killing your process if RAM is not enough
 
 Pandas example:
 ```python
 import pandas as pd
 
+# Loads the whole CSV into memory in one go
 df = pd.read_csv("large_file.csv")
+
+# Any operations now work on a fully materialized DataFrame in RAM
+result = df[df["value"] > 100]
 ```
+Key idea: Pandas is simple and eager, but it expects that your dataset (plus intermediate copies) fits comfortably into RAM.
+
+What Polars Does
+- pl.scan_csv("large_file.csv") does not read the whole file immediately.
+- It creates a lazy query plan that can:
+  - Push filters and projections down to the scan
+  - Use streaming to process the file in chunks instead of loading everything at once
 
 Polars example:
 ```python
 import polars as pl
 
-df = pl.scan_csv("large_file.csv")
-result = df.collect()
+# Build a lazy query plan – no data loaded yet
+lazy_df = pl.scan_csv("large_file.csv")
+
+# Add transformations to the plan
+lazy_filtered = lazy_df.filter(pl.col("value") > 100)
+
+# Data is actually read and processed here
+result = lazy_filtered.collect()
+
 ```
-This allows Polars to handle datasets larger than RAM.
+Key idea: Polars can optimize the query and stream data, so it often uses much less RAM, especially on huge files.
 
 ## 05. Copy vs Immutable Data Behavior
 Pandas sometimes creates hidden copies of data, which leads to the famous warning: SettingWithCopyWarning
