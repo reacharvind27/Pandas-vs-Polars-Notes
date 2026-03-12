@@ -23,7 +23,7 @@ But a newer library called Polars is quickly gaining attention because it is fas
 | Type Handling       | Flexible                   | Strict schema enforcement         |
 | Year Introduced     | 2008                       | 2020                              |
 
-# Common Operations (Pandas vs Polars)
+# Common Operations
 
 | Task           | Pandas                           | Polars                                        |
 | -------------- | -------------------------------- | --------------------------------------------- |
